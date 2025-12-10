@@ -1,0 +1,27 @@
+{
+  "name": "social-network_db",
+  "version": "1.0.0",
+  "description": "Social network",
+  "homepage": "https://github.com/fakeowl1/social-network_DB#readme",
+  "bugs": {
+    "url": "https://github.com/fakeowl1/social-network_DB/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fakeowl1/social-network_DB.git"
+  },
+  "license": "MIT",
+  "author": "fakeowl1, KaterynaHl",
+  "type": "module",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node app.js"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.39.1",
+    "eslint": "^9.39.1",
+    "globals": "^16.5.0",
+    "prettier": "3.7.4"
+  }
+}
