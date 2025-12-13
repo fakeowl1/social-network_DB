@@ -65,7 +65,7 @@
 Стовпці:
 | Стовпець | Тип | Обмеження | Опис |
 |----------|-----|-----------|------|
-| id | SERIAL | PRIMARY KEY | Ідентифікатор користувача |
+| id | SERIAL | PRIMARY KEY | Ідентифікатор транзакції |
 | name | VARCHAR(128) | NOT NULL | Назва транзакції |
 | description | VARCHAR(256) | NOT NULL | Опис транзакції |
 | created_at | TIMESTAMP | DEFAULT NOW() | Час створення транзакції |
@@ -80,11 +80,10 @@
 Стовпці:
 | Стовпець | Тип | Обмеження | Опис |
 |----------|-----|-----------|------|
-| id | SERIAL | PRIMARY KEY | Ідентифікатор трансфера |
-| amount | DECIMAL | NOT NULL| Кількість переказу | 
 | account_id | FOREIGN KEY | NOT NULL | Ідентифікатор рахунку |
-| transcation_id | FOREIGN KEY | DEFAULT NOW() | Ідентифікатор транзакції |
-
+| transcation_id | FOREIGN KEY | NOT NULL | Ідентифікатор транзакції |
+| account_id, transcation_id | | PRIMARY KEY | Множинний первинний ключ |
+| amount | DECIMAL | NOT NULL| Кількість переказу | 
 
 Індекси:
 - `idx_transfers_account_id` на `account_id` (для пошуку трансферів рахунку)
