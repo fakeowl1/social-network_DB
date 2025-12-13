@@ -46,7 +46,7 @@
 | id | SERIAL | PRIMARY KEY | Ідентифікатор рахунку |
 | user_id | FOREIGN KEY | NOT NULL | Ідентифікатор користувача |
 | currency | VARCHAR(3) | NOT NULL | Код валюти |
-| created_at | TIMESTAMP | DEFAULT NOW() | Час створення облікового запису |
+| created_at | TIMESTAMP | DEFAULT NOW() | Час створення рахунку запису |
 | deleted_at | TIMESTAMP | NULL | Мітка часу м'якого видалення |
 
 Індекси:
