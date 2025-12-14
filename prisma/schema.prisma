@@ -1,0 +1,62 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model accounts {
+  id         Int         @id @default(autoincrement())
+  user_id    Int
+  balance    Decimal     @db.Decimal(11, 2)
+  currency   String      @db.VarChar(3)
+  created_at DateTime?   @default(now()) @db.Timestamp(6)
+  deleted_at DateTime?   @db.Timestamp(6)
+  users      users       @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  transfers  transfers[]
+
+  @@index([user_id], map: "idx_accounts_user_id")
+}
+
+model tokens {
+  id      Int    @id @default(autoincrement())
+  token   String @db.VarChar(64)
+  user_id Int
+  users   users  @relation(fields: [user_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@index([token], map: "idx_tokens_token")
+}
+
+model transactions {
+  id          Int         @id @default(autoincrement())
+  name        String      @db.VarChar(128)
+  description String?     @db.VarChar(256)
+  currency    String      @db.VarChar(3)
+  created_at  DateTime?   @default(now()) @db.Timestamp(6)
+  transfers   transfers[]
+}
+
+model transfers {
+  account_id     Int
+  transaction_id Int
+  amount         Decimal      @db.Decimal(11, 2)
+  accounts       accounts     @relation(fields: [account_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+  transactions   transactions @relation(fields: [transaction_id], references: [id], onDelete: NoAction, onUpdate: NoAction)
+
+  @@id([account_id, transaction_id])
+}
+
+model users {
+  id            Int        @id @default(autoincrement())
+  first_name    String     @db.VarChar(32)
+  last_name     String     @db.VarChar(32)
+  email         String     @unique @db.VarChar(128)
+  password_hash String     @db.VarChar
+  created_at    DateTime?  @default(now()) @db.Timestamp(6)
+  deleted_at    DateTime?  @db.Timestamp(6)
+  accounts      accounts[]
+  tokens        tokens[]
+
+  @@index([email], map: "idx_users_email")
+}
