@@ -12,8 +12,23 @@ services:
     networks:
       - app-network 
   
+  postgres-test:
+    image: postgres
+    restart: always
+    container_name: postgres_test
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_TEST_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_TEST_USER}
+    ports:
+      - "5433:5432"
+    networks:
+      - app-network
+
+
 volumes:
   postgres_data:
+    driver: local
+  postgres_test_data:
     driver: local
 
 networks:
