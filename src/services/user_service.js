@@ -1,7 +1,7 @@
 import { InvalidData, RecordAlreadyExists, RecordNotFound, Unauthorized } from '../error-handler.js';
 
 export const createUser = async (prisma, email, firstName, lastName, hashedPassword) => {
-  return await prisma.$transaction(async (tx) => {
+  return prisma.$transaction(async (tx) => {
       const validEmail = /^[\w\-.]+@([\w-]+\.)+[\w-]{2,}$/;
       
       if (!validEmail.test(email)) {
