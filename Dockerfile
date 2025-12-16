@@ -2,10 +2,10 @@ FROM node:25.2
 
 WORKDIR /app
 
-COPY package.json package-lock.json .
+COPY . . 
 RUN npm install
 
-COPY . .
+RUN npx prisma generate
 
 EXPOSE 3000
 
