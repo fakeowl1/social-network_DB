@@ -45,7 +45,10 @@ export const findAccountById = async (user_id, account_id) => {
 
 export const findUserAccounts = async (user_id) => {
   const accounts = await prisma.accounts.findMany({
-    where: { user_id: user_id },
+    where: { 
+      user_id: user_id,
+      deleted_at: null,
+    },
     select: {
       id: true,
       balance: true,
