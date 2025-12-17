@@ -113,7 +113,7 @@ export const usersRoutes = async (fastify, options) => {
       return reply.code(200).send(token);
   });
 
-  fastify.post(
+  fastify.get(
     '/myAccounts',
     getCurrentUserAccounts,
     async (req, reply) => {
