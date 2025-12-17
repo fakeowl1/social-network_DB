@@ -36,22 +36,12 @@ export const createUser = async (email, firstName, lastName, hashedPassword) => 
   }); 
 };
 
-// TODO: delete it
-export const findOneUser = async (email) => {
+export const findOneUser = async (user_id) => {
   const user = await prisma.users.findUnique({
-    where: { email }
-  });
-
-  if (!user) {
-    throw new RecordNotFound(`User is not found`);
-  }
-
-  return user;
-};
-
-export const findUserByUserId = async (user_id) => {
-  const user = await prisma.users.findUnique({
-    where: { id: user_id }
+    where: { 
+      id: user_id,
+      is_deleted: null,
+    }
   });
 
   if (!user) {
@@ -61,11 +51,10 @@ export const findUserByUserId = async (user_id) => {
   return user;
 }
 
-// TODO: REFACTOR
 export const deactivateUser = async (token) => {
   return prisma.$transaction(async (tx) => {
-      const tokenRecord = await tx.tokens.findUnique({
-        where: { token: token }
+      const tokenRecord = await tx.tokens.findFirst({
+        where: { token }
       });
 
       if (!tokenRecord) {
@@ -77,7 +66,7 @@ export const deactivateUser = async (token) => {
           user_id: tokenRecord.user_id
         },
         data: {
-          is_deleted: true,
+          is_deleted: new Date(),
         }
       });
   });
