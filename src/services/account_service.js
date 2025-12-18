@@ -10,14 +10,6 @@ export const createAccount = async (accountName, currency) => {
       throw new InvalidData("Invalid currency");
     }
 
-    const user = await tx.users.findUnique({
-      where: { id: accountName }
-    });
-
-    if (!user) {
-      throw new RecordNotFound('User not found');
-    }
-
     return tx.accounts.create({
       data: {
         name: accountName,
