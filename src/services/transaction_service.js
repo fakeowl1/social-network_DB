@@ -33,5 +33,20 @@ const userAccountName = `user_${userId}`;
     if (!userAccount) {
       throw new RecordNotFound('User account not found');
     }
+    const systemAccountName =
+      type === 'income'
+        ? 'system_income'
+        : `system_${category}`;
+
+    const systemAccount = await tx.accounts.findFirst({
+      where: {
+        name: systemAccountName,
+        deleted_at: null
+      }
+    });
+
+    if (!systemAccount) {
+      throw new RecordNotFound('System account not found');
+    }
 });
 };
