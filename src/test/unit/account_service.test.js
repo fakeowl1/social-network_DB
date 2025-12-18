@@ -3,6 +3,7 @@
 import prisma from '../../../prisma/prisma-client.js';
 import {
   createAccount,
+  findAccountById
 } from '../../services/account_service.js';
 
 import {
@@ -14,6 +15,21 @@ describe('Account Services', () => {
 
   let createdUserIds = [];
   let createdAccountIds = [];
+
+  //HELPER FUNCTION
+  const createTestUser = async () => {
+    const user = await prisma.users.create({
+      data: {
+        email: `test_${Date.now()}@example.com`,
+        first_name: 'Test',
+        last_name: 'User',
+        password_hash: 'hash',
+        password_salt: 'salt'
+      }
+    });
+    createdUserIds.push(user.id);
+    return user;
+  };
 
   beforeAll(async () => {
     await prisma.$executeRawUnsafe(`
@@ -43,20 +59,6 @@ describe('Account Services', () => {
     }
   });
 
-  const createTestUser = async () => {
-    const user = await prisma.users.create({
-      data: {
-        first_name: 'Test',
-        last_name: 'User',
-        email: `test_${Date.now()}@example.com`,
-        password_hash: 'hash',
-        password_salt: 'salt'
-      }
-    });
-    createdUserIds.push(user.id);
-    return user;
-  };
-
   describe('createAccount', () => {
     it('should create an account with valid input', async () => {
       const user = await createTestUser();
@@ -79,6 +81,27 @@ describe('Account Services', () => {
     it('should throw error if user not found', async () => {
       await expect(
         createAccount(99999, 'USD')
+      ).rejects.toThrow(RecordNotFound);
+    });
+  });
+
+  describe('findAccountById', () => {
+    it('should return account when found', async () => {
+      const user = await createTestUser();
+
+      const account = await createAccount(user.id, 'EUR');
+      createdAccountIds.push(account.id);
+
+      const foundAccount = await findAccountById(user.id, account.id);
+
+      expect(foundAccount.id).toBe(account.id);
+    });
+
+    it('should throw error if account not found', async () => {
+      const user = await createTestUser();
+
+      await expect(
+        findAccountById(user.id, 99999)
       ).rejects.toThrow(RecordNotFound);
     });
   });
