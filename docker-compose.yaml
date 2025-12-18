@@ -1,6 +1,6 @@
 services:
   postgres:
-    image: postgres
+    image: postgres:15
     restart: always
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
@@ -22,6 +22,8 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
+    env_file:
+      - .env
     command: "npx prisma migrate deploy"
     restart: "no"
 
@@ -32,6 +34,8 @@ services:
     build:
       dockerfile: Dockerfile
       context: .
+    env_file:
+      - .env
     ports:
       - "8080:8080"
 
