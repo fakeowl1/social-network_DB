@@ -57,7 +57,7 @@ const userAccountName = `user_${userId}`;
         amount
         }
         });
-        
+
         const fromAccount =
         type === 'income' ? systemAccount : userAccount;
   
@@ -72,5 +72,17 @@ const userAccountName = `user_${userId}`;
           amount
         }
       });
+      
+      await tx.accounts.update({
+        where: { id: fromAccount.id },
+        data: { balance: { decrement: amount } }
+      });
+  
+      await tx.accounts.update({
+        where: { id: toAccount.id },
+        data: { balance: { increment: amount } }
+      });
+  
+      return transaction;
 });
 };
