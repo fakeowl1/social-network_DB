@@ -1,14 +1,30 @@
-import prisma from '../../prisma/prisma-client.js';
-import { InvalidData, RecordNotFound } from '../error-handler.js';
+import prisma from '../../prisma/prisma-client.js'
+import { InvalidData, RecordAlreadyExists, RecordNotFound } from '../error-handler.js';
 
-export const createAccount = async (user_id, currency) => {
+export const createAccount = async (userId, currency) => {
   return prisma.$transaction(async (tx) => {
-    const name = `user_${user_id}`;
+    const name = `user_${userId}`;
+
+    const user = await tx.users.findUnique({
+      where: { id: userId }
+    });
+
+    if (!user) {
+      throw new RecordNotFound('Invalid user_id');
+    }
 
     const validCurrency = /\b[A-Z]{3}\b/g;
 
     if (!validCurrency.test(currency)) {
       throw new InvalidData("Invalid currency");
+    }
+
+    const isAccountExists = await tx.accounts.findUnique({
+      where: { name_currency: { name, currency }, deleted_at: null }
+    });
+    
+    if (isAccountExists) {
+      throw new RecordAlreadyExists('Account alredy exists');
     }
 
     const account = await tx.accounts.create({
