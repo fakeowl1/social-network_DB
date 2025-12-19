@@ -1,8 +1,9 @@
 import prisma from '../../prisma/prisma-client.js';
-import { InvalidData, RecordNotFound, Unauthorized } from '../error-handler.js';
+import { InvalidData, RecordNotFound } from '../error-handler.js';
 
-export const createAccount = async (accountName, currency) => {
+export const createAccount = async (user_id, currency) => {
   return prisma.$transaction(async (tx) => {
+    const name = `user_${user_id}`;
 
     const validCurrency = /\b[A-Z]{3}\b/g;
 
@@ -10,22 +11,23 @@ export const createAccount = async (accountName, currency) => {
       throw new InvalidData("Invalid currency");
     }
 
-    return tx.accounts.create({
+    const account = await tx.accounts.create({
       data: {
-        name: accountName,
-        balance: 0
+        name,
+        balance: 0,
+        currency,
       }
     });
+
+    return account;
   });
 };
 
-export const findAccountById = async (accountName, accountId) => {
+export const findUserAccount = async (userId, currency, category) => {
+  const name = category ? `user_${userId}_${category}` : `user_${userId}`; 
+
   const account = await prisma.accounts.findUnique({
-    where: { 
-      id: accountId,
-      name: accountName,
-      deleted_at: null,
-    }
+    where: { name_currency: { name, currency }, deleted_at: null }
   });
 
   if (!account) {
@@ -35,33 +37,13 @@ export const findAccountById = async (accountName, accountId) => {
   return account;
 };
 
-export const findUserAccounts = async (accountName) => {
-  const accounts = await prisma.accounts.findMany({
-    where: { 
-      name: accountName,
-      deleted_at: null,
-    },
-    select: {
-      id: true,
-      balance: true,
-      currency: true,
-    }
-  });
-
-  if (accounts.length == 0) {
-    throw new RecordNotFound('User don\'t have any accounts');
-  }
-
-  return accounts;
-}
-
-export const deleteAccount = async (accountName, accountId) => {
+export const deleteAccount = async (userId) => {
   return prisma.$transaction(async (tx) => {
+    const name = `user_${userId}`;
+
     const account = await tx.accounts.findFirst({
-      where: {
-          id: accountId,
-          name: accountName,  
-          deleted_at: null
+      where: { 
+        name, deleted_at: null
       }
     });
 
@@ -69,12 +51,8 @@ export const deleteAccount = async (accountName, accountId) => {
       throw new RecordNotFound('Account not found');
     }
 
-    if (Number(account.balance) !== 0) {
-      throw new InvalidData('Account balance must be zero');
-    }
-
-    await tx.accounts.update({
-      where: { id: accountId },
+    await tx.accounts.updateMany({
+      where: { name: { startsWith: name } },
       data: { deleted_at: new Date() }
     });
   });
