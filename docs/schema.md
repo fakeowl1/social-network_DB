@@ -14,7 +14,7 @@
 - `idx_tokens_token` на `token` (для пошуку токена)
 
 Зв'язки:
-- Один-до-багатьох з `Users` (користувач може мати кілька замовлень)
+- Один-до-багатьох з `Users` (користувач може мати кілька токенів)
 
 # Таблиця: `Users`
 
@@ -36,7 +36,7 @@
 - `idx_users_email` на `email` (для пошуку при вході)
 
 Зв'язки:
-- Один-до-багатьох з `Accounts` (користувач може мати кілька рахунків)
+- Один-до-багатьох з `Users` (користувач може мати кілька токенів)
 
 # Таблиця: `Accounts`
 
@@ -46,14 +46,11 @@
 | Стовпець | Тип | Обмеження | Опис |
 |----------|-----|-----------|------|
 | id | INT | PRIMARY KEY | Ідентифікатор рахунку |
-| user_id | INT | FOREIGN KEY, NOT NULL | Ідентифікатор користувача |
+| name | VARCHAR(255) | UNIQUE, NOT NULL | назва рахунку в форматі user_{userid}/user_{userid}_category |
 | balance | DECIMAL(11, 2) | NOT NULL | Баланс | 
-| currency | VARCHAR(3) | NOT NULL | Код валюти |
+| currency | VARCHAR(3) | UNIQUE, NOT NULL | Код валюти |
 | created_at | TIMESTAMP | DEFAULT NOW() | Час створення рахунку запису |
 | deleted_at | TIMESTAMP | NULL | Мітка часу м'якого видалення |
-
-Індекси:
-- `idx_accounts_user_id` на `user_id` (для пошуку рахунків користувача)
 
 Зв'язки:
 - Один-до-багатьох з `Transfers` (користувач може робити кілька транзакцій)
@@ -68,7 +65,8 @@
 | id | INT | PRIMARY KEY | Ідентифікатор транзакції |
 | name | VARCHAR(128) | NOT NULL | Назва транзакції |
 | currency | VARCHAR(3) | NOT NULL | Код валюти |
-| description | VARCHAR(256) | NOT NULL | Опис транзакції |
+| category | VARCHAR(255) | NOT NULL | Категорія транзакції |
+| description | VARCHAR(256) | | Опис транзакції |
 | created_at | TIMESTAMP | DEFAULT NOW() | Час створення транзакції |
 
 Зв'язки:
@@ -84,7 +82,4 @@
 | account_id | INT | NOT NULL | Ідентифікатор рахунку |
 | transaction_id | INT | NOT NULL | Ідентифікатор транзакції |
 | account_id, transaction_id | | PRIMARY KEY, FOREIGN KEY | Множинний ідентифікатор трансферу |
-| amount | DECIMAL | NOT NULL| Кількість переказу | 
-
-Індекси:
-- `idx_transfers_account_id` на `account_id` (для пошуку трансферів однієї транзакції)
+| amount | DECIMAL(11,2) | NOT NULL| Кількість переказу | 
