@@ -3,7 +3,7 @@
 import prisma from '../../../prisma/prisma-client.js';
 import {
   createAccount,
-  findAccountById,
+  findUserAccount,
   deleteAccount
 } from '../../services/account_service.js';
 
@@ -13,7 +13,6 @@ import {
 } from '../../error-handler.js';
 
 describe('Account Services', () => {
-
   let createdUserIds = [];
   let createdAccountIds = [];
 
@@ -86,14 +85,14 @@ describe('Account Services', () => {
     });
   });
 
-  describe('findAccountById', () => {
+  describe('findAccount', () => {
     it('should return account when found', async () => {
       const user = await createTestUser();
 
       const account = await createAccount(user.id, 'EUR');
       createdAccountIds.push(account.id);
 
-      const foundAccount = await findAccountById(user.id, account.id);
+      const foundAccount = await findUserAccount(user.id, 'EUR');
 
       expect(foundAccount.id).toBe(account.id);
     });
@@ -102,7 +101,7 @@ describe('Account Services', () => {
       const user = await createTestUser();
 
       await expect(
-        findAccountById(user.id, 99999)
+        findUserAccount(user.id, 'USD')
       ).rejects.toThrow(RecordNotFound);
     });
   });
@@ -117,26 +116,8 @@ describe('Account Services', () => {
       await deleteAccount(user.id, account.id);
 
       await expect(
-        findAccountById(user.id, account.id)
+        findUserAccount(user.id, 'USD')
       ).rejects.toThrow(RecordNotFound);
     });
-
-    it('should throw error if balance is not zero', async () => {
-      const user = await createTestUser();
-
-      const account = await prisma.accounts.create({
-        data: {
-          user_id: user.id,
-          currency: 'USD',
-          balance: 100
-        }
-      });
-      createdAccountIds.push(account.id);
-
-      await expect(
-        deleteAccount(user.id, account.id)
-      ).rejects.toThrow(InvalidData);
-    });
   });
-
 }); 
