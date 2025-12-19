@@ -1,38 +1,70 @@
-import { createAccount, findAccountById, deleteAccount } from '../services/account_service.js';
+import { findUserAccount, deleteAccount } from '../services/account_service.js';
 import { getUserIdFromToken } from '../services/token_service.js';
 
+const tokenHeader = {
+  required: ['x-token'],
+  type: 'object',
+  properties: {
+    'x-token': { type: 'string' }
+  }
+};
+
+const getAccountOptions = {
+  schema: {
+    headers: tokenHeader,
+    params: {
+      required: ['currency'],
+      type: 'object',
+      properties: {
+        currency: { type: 'string' },
+        category: { type: 'string' }
+      }
+    },
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          id: { type: 'number' },
+          currency: { type: 'string' },
+          balance: { type: 'number' },
+          created_at: { type: 'string' }
+        }
+      }
+    }
+  }
+};
+
+const deleteAccountOptions = {
+  schema: {
+    headers: tokenHeader,
+    response: {
+      200: {
+        type: 'object',
+        properties: {
+          status: { type: 'string' }
+        }
+      }
+    }
+  }
+};
+
 export const accountsRoutes = async (fastify, options) => {
-
-  // CREATE ACCOUNT
-  fastify.post('/', async (req, reply) => {
-    const token = req.headers.authorization;
-    const { currency } = req.body;
+  fastify.get('/:currency/:category?', getAccountOptions, async (req, reply) => {
+    const token = req.headers['x-token'];
+    const { currency, category } = req.params;
 
     const user_id = await getUserIdFromToken(token);
-    const account = await createAccount(user_id, currency);
-
-    return reply.code(201).send(account);
-  });
-
-  // CHECK ACCOUNT
-  fastify.get('/:id', async (req, reply) => {
-    const token = req.headers.authorization;
-    const account_id = Number(req.params.id);
-
-    const user_id = await getUserIdFromToken(token);
-    const account = await findAccountById(user_id, account_id);
+    const account = await findUserAccount(user_id, currency, category);
 
     return reply.code(200).send(account);
   });
 
-  // DELETE ACCOUNT
-  fastify.delete('/:id', async (req, reply) => {
-    const token = req.headers.authorization;
-    const account_id = Number(req.params.id);
-
+  fastify.delete('/delete', deleteAccountOptions, async (req, reply) => {
+    const token = req.headers['x-token'];
     const user_id = await getUserIdFromToken(token);
-    await deleteAccount(user_id, account_id);
 
-    return reply.code(204).send({ status: "Your account successfully deactivated" });
+    await deleteAccount(user_id);
+
+    return reply.code(200).send({ status: "Your account successfully deactivated" });
   });
 };
