@@ -2,12 +2,13 @@ import { createAccount, findAccountById, deleteAccount } from '../services/accou
 import { getUserIdFromToken } from '../services/token_service.js';
 
 const tokenHeader = {
-  required: ['authorization'],
+  required: ['x-token'],
   type: 'object',
   properties: {
-    authorization: { type: 'string' }
+    'x-token': { type: 'string' }
   }
 };
+
 
 const createAccountOptions = {
   schema: {
@@ -16,7 +17,7 @@ const createAccountOptions = {
       required: ['currency'],
       type: 'object',
       properties: {
-        currency: { type: 'string', minLength: 3, maxLength: 3 }
+        currency: { type: 'string' }
       }
     },
     response: {
@@ -80,12 +81,11 @@ const deleteAccountOptions = {
 
 export const accountsRoutes = async (fastify, options) => {
 
-  // CREATE ACCOUNT
   fastify.post(
     '/',
     createAccountOptions,
     async (req, reply) => {
-    const token = req.headers.authorization;
+    const token = req.headers['x-token'];
     const { currency } = req.body;
 
     const user_id = await getUserIdFromToken(token);
@@ -94,9 +94,8 @@ export const accountsRoutes = async (fastify, options) => {
     return reply.code(201).send(account);
   });
 
-  // CHECK ACCOUNT
   fastify.get('/:id', getAccountOptions, async (req, reply) => {
-    const token = req.headers.authorization;
+    const token = req.headers['x-token'];
     const account_id = Number(req.params.id);
 
     const user_id = await getUserIdFromToken(token);
@@ -105,9 +104,8 @@ export const accountsRoutes = async (fastify, options) => {
     return reply.code(200).send(account);
   });
 
-  // DELETE ACCOUNT
   fastify.delete('/:id', deleteAccountOptions, async (req, reply) => {
-    const token = req.headers.authorization;
+    const token = req.headers['x-token'];
     const account_id = Number(req.params.id);
 
     const user_id = await getUserIdFromToken(token);
