@@ -41,6 +41,27 @@
 
 ## Структура проєкту
 
+src/
+├── error-handler.js
+├── routes
+│   ├── accounts.js
+│   ├── transaction.js
+│   └── users.js
+├── services
+│   ├── account_service.js
+│   ├── token_service.js
+│   ├── transaction_service.js
+│   └── user_service.js
+├── test
+│   ├── integration
+│   └── unit
+│       ├── account_service.test.js
+│       ├── jest.unit.config.js
+│       ├── transaction_service.test.js
+│       ├── user_service.test.js
+│       └── utils.test.js
+└── utils.js
+
 ## Приклади API 
 
 ## TODO
