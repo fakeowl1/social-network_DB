@@ -1,6 +1,7 @@
 import prisma from '../../prisma/prisma-client.js';
 import { InvalidData, RecordNotFound, Unauthorized } from '../error-handler.js';
-export const createAccount = async (user_id, currency) => {
+
+export const createAccount = async (accountName, currency) => {
   return prisma.$transaction(async (tx) => {
 
     const validCurrency = /\b[A-Z]{3}\b/g;
@@ -9,29 +10,20 @@ export const createAccount = async (user_id, currency) => {
       throw new InvalidData("Invalid currency");
     }
 
-    const user = await tx.users.findUnique({
-      where: { id: user_id }
-    });
-
-    if (!user) {
-      throw new RecordNotFound('User not found');
-    }
-
     return tx.accounts.create({
       data: {
-        user_id,
-        currency: currency.toUpperCase(),
+        name: accountName,
         balance: 0
       }
     });
   });
 };
 
-export const findAccountById = async (user_id, account_id) => {
+export const findAccountById = async (accountName, accountId) => {
   const account = await prisma.accounts.findUnique({
     where: { 
-      id: account_id,
-      user_id: user_id,
+      id: accountId,
+      name: accountName,
       deleted_at: null,
     }
   });
@@ -43,10 +35,10 @@ export const findAccountById = async (user_id, account_id) => {
   return account;
 };
 
-export const findUserAccounts = async (user_id) => {
+export const findUserAccounts = async (accountName) => {
   const accounts = await prisma.accounts.findMany({
     where: { 
-      user_id: user_id,
+      name: accountName,
       deleted_at: null,
     },
     select: {
@@ -63,12 +55,12 @@ export const findUserAccounts = async (user_id) => {
   return accounts;
 }
 
-export const deleteAccount = async (user_id, account_id) => {
+export const deleteAccount = async (accountName, accountId) => {
   return prisma.$transaction(async (tx) => {
     const account = await tx.accounts.findFirst({
       where: {
-          id: account_id,
-          user_id: user_id,
+          id: accountId,
+          name: accountName,  
           deleted_at: null
       }
     });
@@ -82,7 +74,7 @@ export const deleteAccount = async (user_id, account_id) => {
     }
 
     await tx.accounts.update({
-      where: { id: account_id },
+      where: { id: accountId },
       data: { deleted_at: new Date() }
     });
   });
